@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ams-scanner"
+version = "0.1.0"
+description = "Activation-based Model Scanner - Verify LLM safety via activation pattern analysis"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Glen Messenger", email = "glen.messenger@gmail.com"}
+]
+keywords = [
+    "ai-safety",
+    "llm",
+    "machine-learning",
+    "model-security",
+    "activation-analysis",
+    "language-models",
+    "safety-verification",
+    "model-scanning",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0.0",
+    "transformers>=4.35.0",
+    "numpy>=1.21.0",
+    "safetensors>=0.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+cli = [
+    "rich>=13.0.0",
+]
+quantization = [
+    "bitsandbytes>=0.41.0",
+    "accelerate>=0.24.0",
+]
+all = [
+    "ams-scanner[dev,cli,quantization]",
+]
+
+[project.scripts]
+ams = "ams.cli:main"
+ams-scanner = "ams.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/GoogleCloudPlatform/activation-model-scanner"
+Documentation = "https://github.com/GoogleCloudPlatform/activation-model-scanner#readme"
+Repository = "https://github.com/GoogleCloudPlatform/activation-model-scanner"
+Issues = "https://github.com/GoogleCloudPlatform/activation-model-scanner/issues"
+Changelog = "https://github.com/GoogleCloudPlatform/activation-model-scanner/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ams = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
