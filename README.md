@@ -266,9 +266,7 @@ AMS builds on the AASE (Activation-based AI Safety Enforcement) methodology:
 ```bibtex
 @misc{messenger_2026_19209689,
   author       = {Messenger, Glen},
-  title        = {AASE: Activation-Based AI Safety Enforcement via
-                   Lightweight Probes
-                  },
+  title        = {AASE: Activation-Based AI Safety Enforcement via Lightweight Probes},
   month        = mar,
   year         = 2026,
   publisher    = {Zenodo},
