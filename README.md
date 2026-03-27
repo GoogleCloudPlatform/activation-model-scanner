@@ -259,29 +259,21 @@ Contributions welcome! Key areas:
 - Support for additional model architectures
 - Threshold calibration studies
 
-## Citation
-
-If you use AMS in your research, please cite:
-
-```bibtex
-@article{messenger2026ams,
-  title = {AMS: Detecting Unsafe and Tampered Language Models via Activation Analysis},
-  author = {Messenger, Glen},
-  journal = {arXiv preprint},
-  year = {2026}
-}
-```
-
 ## Related Work
 
 AMS builds on the AASE (Activation-based AI Safety Enforcement) methodology:
 
 ```bibtex
-@article{messenger2026aase,
-  title = {AASE: Activation-based AI Safety Enforcement via Lightweight Probes},
-  author = {Messenger, Glen},
-  journal = {arXiv preprint},
-  year = {2026}
+@misc{messenger_2026_19209689,
+  author       = {Messenger, Glen},
+  title        = {AASE: Activation-Based AI Safety Enforcement via
+                   Lightweight Probes
+                  },
+  month        = mar,
+  year         = 2026,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.19209689},
+  url          = {https://doi.org/10.5281/zenodo.19209689},
 }
 ```
 
