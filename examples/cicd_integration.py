@@ -20,9 +20,9 @@ Example: CI/CD Integration
 Shows how to integrate AMS into automated pipelines with proper exit codes.
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 from pathlib import Path
 
 from ams import ModelScanner, SafetyLevel
@@ -33,33 +33,34 @@ def main():
     parser.add_argument("model", help="Model path or HuggingFace ID")
     parser.add_argument("--baseline", help="Baseline model for identity verification")
     parser.add_argument("--output", "-o", help="Output JSON file")
-    parser.add_argument("--strict", action="store_true", 
-                       help="Fail on WARNING (not just CRITICAL)")
+    parser.add_argument("--strict", action="store_true", help="Fail on WARNING (not just CRITICAL)")
     args = parser.parse_args()
-    
+
     scanner = ModelScanner()
-    
+
     # Run scan
     print(f"Scanning model: {args.model}")
     result = scanner.scan(args.model)
-    import pdb; pdb.set_trace()
-    
+    import pdb
+
+    pdb.set_trace()
+
     # Run identity verification if baseline provided
     if args.baseline:
         print(f"Verifying against baseline: {args.baseline}")
         verify_result = scanner.verify(args.model, args.baseline)
         result.identity_verification = verify_result
-    
+
     # Output results
     result_dict = result.to_dict()
-    
+
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             json.dump(result_dict, f, indent=2)
         print(f"Results written to: {args.output}")
     else:
         print(json.dumps(result_dict, indent=2))
-    
+
     # Determine exit code
     if result.overall_level == SafetyLevel.CRITICAL:
         print("\n❌ FAILED: Model has CRITICAL safety issues")
