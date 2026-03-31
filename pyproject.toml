@@ -42,6 +42,7 @@ dependencies = [
     "transformers>=4.35.0",
     "numpy>=1.21.0",
     "safetensors>=0.3.0",
+    "accelerate>=0.24.0",
 ]
 
 [project.optional-dependencies]
@@ -58,7 +59,6 @@ cli = [
 ]
 quantization = [
     "bitsandbytes>=0.41.0",
-    "accelerate>=0.24.0",
 ]
 all = [
     "ams-scanner[dev,cli,quantization]",
@@ -69,11 +69,11 @@ ams = "ams.cli:main"
 ams-scanner = "ams.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/GoogleCloudPlatform/activation-model-scanner"
-Documentation = "https://github.com/GoogleCloudPlatform/activation-model-scanner#readme"
-Repository = "https://github.com/GoogleCloudPlatform/activation-model-scanner"
-Issues = "https://github.com/GoogleCloudPlatform/activation-model-scanner/issues"
-Changelog = "https://github.com/GoogleCloudPlatform/activation-model-scanner/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/googlecloudplatform/ams-scanner"
+Documentation = "https://github.com/googlecloudplatform/ams-scanner#readme"
+Repository = "https://github.com/googlecloudplatform/ams-scanner"
+Issues = "https://github.com/googlecloudplatform/ams-scanner/issues"
+Changelog = "https://github.com/googlecloudplatform/ams-scanner/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -98,7 +98,6 @@ python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
-follow_imports = "skip"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
