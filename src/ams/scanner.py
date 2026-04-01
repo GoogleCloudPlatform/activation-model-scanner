@@ -326,6 +326,7 @@ class ModelScanner:
         load_in_8bit: bool = False,
         load_in_4bit: bool = False,
         compare_to: Optional[str] = None,
+        concepts_file: Optional[str] = None,
     ) -> SafetyReport:
         """
         Perform Tier 1 generic safety scan.
@@ -352,6 +353,20 @@ class ModelScanner:
         """
         start_time = time.time()
 
+        # Resolve concepts
+        from .concepts import get_scan_concepts, load_concepts_from_json
+
+        concepts = get_scan_concepts(mode)
+        if concepts_file:
+            custom = load_concepts_from_json(concepts_file)
+            resolved = []
+            for c in concepts:
+                if c.name in custom:
+                    resolved.append(custom[c.name])
+                else:
+                    resolved.append(c)
+            concepts = resolved
+
         # Load comparison baseline if specified
         baseline_results = None
         if compare_to is not None:
@@ -370,7 +385,7 @@ class ModelScanner:
                 )
                 assert self._extractor is not None
                 baseline_results = {}
-                concepts = get_scan_concepts(mode)
+                # Using resolved concepts
                 for concept in concepts:
                     direction_result, _ = self._extractor.extract_direction_with_layer_search(
                         positive_prompts=concept.get_positive_prompts(),
@@ -391,9 +406,6 @@ class ModelScanner:
 
         # Get model info
         model_info = ModelLoader.get_model_info(self._model)
-
-        # Get concepts for scan mode
-        concepts = get_scan_concepts(mode)
 
         # Scan each concept
         concept_results = {}
@@ -680,6 +692,7 @@ class ModelScanner:
         mode: str = "standard",
         batch_size: int = 8,
         compare_to: Optional[str] = None,
+        concepts_file: Optional[str] = None,
         **model_kwargs,
     ) -> Tuple[SafetyReport, Optional[VerificationReport]]:
         """
@@ -702,6 +715,7 @@ class ModelScanner:
             mode=mode,
             batch_size=batch_size,
             compare_to=compare_to,
+            concepts_file=concepts_file,
             **model_kwargs,
         )
 

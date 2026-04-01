@@ -251,39 +251,48 @@ def cmd_scan(args):
     console = Console() if RICH_AVAILABLE else None
 
     # Show progress
-    if RICH_AVAILABLE and not args.quiet:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
-            task_desc = "Loading model..."
-            if args.compare:
-                task_desc = f"Loading models (comparing to {args.compare})..."
-            progress.add_task(task_desc, total=None)
+    try:
+        if RICH_AVAILABLE and not args.quiet:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+            ) as progress:
+                task_desc = "Loading model..."
+                if args.compare:
+                    task_desc = f"Loading models (comparing to {args.compare})..."
+                progress.add_task(task_desc, total=None)
+                safety_report, verification_report = scanner.full_scan(
+                    model_path=args.model,
+                    claimed_identity=args.verify,
+                    mode=args.mode,
+                    batch_size=args.batch_size,
+                    compare_to=args.compare,
+                    concepts_file=args.concepts_file,
+                    trust_remote_code=args.trust_remote_code,
+                    load_in_8bit=args.load_8bit,
+                    load_in_4bit=args.load_4bit,
+                )
+        else:
+            if not args.quiet:
+                print("Loading model...")
             safety_report, verification_report = scanner.full_scan(
                 model_path=args.model,
                 claimed_identity=args.verify,
                 mode=args.mode,
                 batch_size=args.batch_size,
                 compare_to=args.compare,
+                concepts_file=args.concepts_file,
                 trust_remote_code=args.trust_remote_code,
                 load_in_8bit=args.load_8bit,
                 load_in_4bit=args.load_4bit,
             )
-    else:
-        if not args.quiet:
-            print("Loading model...")
-        safety_report, verification_report = scanner.full_scan(
-            model_path=args.model,
-            claimed_identity=args.verify,
-            mode=args.mode,
-            batch_size=args.batch_size,
-            compare_to=args.compare,
-            trust_remote_code=args.trust_remote_code,
-            load_in_8bit=args.load_8bit,
-            load_in_4bit=args.load_4bit,
-        )
+    except ValueError as e:
+        if RICH_AVAILABLE and not args.quiet:
+            console.print(f"\n[bold red]Configuration Error:[/bold red] {e}")
+        else:
+            print(f"\nConfiguration Error: {e}")
+        sys.exit(1)
 
     # Output results
     if args.json:
@@ -450,6 +459,9 @@ Examples:
     )
     scan_parser.add_argument(
         "--load-4bit", action="store_true", help="Load model in 4-bit quantization"
+    )
+    scan_parser.add_argument(
+        "--concepts-file", metavar="FILE", help="Custom JSON file with safety concepts"
     )
     scan_parser.set_defaults(func=cmd_scan)
 

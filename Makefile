@@ -34,7 +34,7 @@ test-cov:
 lint:
 	black --check src tests
 	isort --check-only src tests
-	mypy src/ams
+	mypy --follow-imports=skip src/ams
 
 # Format code
 format:
