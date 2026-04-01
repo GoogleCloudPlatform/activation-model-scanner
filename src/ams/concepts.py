@@ -366,16 +366,45 @@ def export_concepts_to_json(path: str):
 
 def load_concepts_from_json(path: str) -> Dict[str, SafetyConcept]:
     """Load concepts from JSON (allows customization)."""
-    with open(path) as f:
-        data = json.load(f)
+    try:
+        with open(path) as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        raise ValueError(f"Concepts file not found at '{path}'")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON syntax in '{path}': {e}")
+
+    if not isinstance(data, dict):
+        raise ValueError(f"Root of concepts file '{path}' must be a JSON object (dictionary)")
 
     concepts = {}
     for name, info in data.items():
-        pairs = [ContrastivePair(p["positive"], p["negative"]) for p in info["pairs"]]
+        if not isinstance(info, dict):
+            raise ValueError(f"Concept '{name}' must be a JSON object (dictionary)")
+
+        if "description" not in info:
+            raise ValueError(f"Concept '{name}' is missing the required 'description' key")
+        if "pairs" not in info:
+            raise ValueError(f"Concept '{name}' is missing the required 'pairs' key")
+
+        pairs_data = info["pairs"]
+        if not isinstance(pairs_data, list):
+            raise ValueError(f"'pairs' in concept '{name}' must be a JSON array (list)")
+
+        pairs = []
+        for i, p in enumerate(pairs_data):
+            if not isinstance(p, dict):
+                raise ValueError(f"Pair index {i} in concept '{name}' must be a JSON object")
+            if "positive" not in p or "negative" not in p:
+                raise ValueError(
+                    f"Pair index {i} in concept '{name}' is missing 'positive' or 'negative' keys"
+                )
+            pairs.append(ContrastivePair(str(p["positive"]), str(p["negative"])))
+
         concepts[name] = SafetyConcept(
             name=name,
-            description=info["description"],
+            description=str(info["description"]),
             pairs=pairs,
-            min_separation=info.get("min_separation", 2.0),
+            min_separation=float(info.get("min_separation", 2.0)),
         )
     return concepts

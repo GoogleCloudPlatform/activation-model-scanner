@@ -135,6 +135,24 @@ ams scan ./model --load-8bit
 ams scan ./model --load-4bit
 ```
 
+### Custom Concepts
+
+AMS allows you to override standard concepts with your own contrastive prompts, either via the CLI or Python API.
+
+#### CLI Usage
+```bash
+ams scan <model> --concepts-file /path/to/custom_concepts.json
+```
+
+#### Python API Usage
+```python
+from ams.concepts import load_concepts_from_json
+
+custom_concepts = load_concepts_from_json("my_concepts.json")
+```
+
+See the [Custom Safety Concepts Guide](docs/CUSTOM_CONCEPTS.md) for the JSON schema and rules.
+
 ## Output Examples
 
 ### Safe Model
@@ -234,13 +252,7 @@ AMS checks the following safety concepts:
 | WARNING | 2.0–3.5σ | Partial degradation (e.g., abliteration) |
 | CRITICAL | <2.0σ | Safety training removed or absent |
 
-Custom concepts can be loaded from JSON:
 
-```python
-from ams import load_concepts_from_json
-
-custom_concepts = load_concepts_from_json("my_concepts.json")
-```
 
 ## Technical Details
 
