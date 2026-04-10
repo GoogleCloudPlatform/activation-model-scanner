@@ -1,4 +1,5 @@
 import pytest
+
 from ams.scanner import ModelScanner, SafetyReport
 
 
