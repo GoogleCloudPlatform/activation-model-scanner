@@ -170,7 +170,7 @@ class ActivationExtractor:
 
             # Collect activations
             for layer in layers:
-                all_activations[layer].append(self._activation_cache[layer].cpu().numpy())
+                all_activations[layer].append(self._activation_cache[layer].cpu().float().numpy())
 
         self._clear_hooks()
 
@@ -402,7 +402,7 @@ class ModelLoader:
         Returns:
             Tuple of (model, tokenizer)
         """
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
         logger.info(f"Loading model from {model_path}")
 
@@ -423,9 +423,9 @@ class ModelLoader:
         }
 
         if load_in_8bit:
-            model_kwargs["load_in_8bit"] = True
+            model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
         elif load_in_4bit:
-            model_kwargs["load_in_4bit"] = True
+            model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True)
         else:
             model_kwargs["torch_dtype"] = dtype
 
