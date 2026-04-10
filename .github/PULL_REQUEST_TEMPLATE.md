@@ -7,3 +7,4 @@ Fixes #<issue_number_goes_here>
 - [ ] **Tests pass**: I have run `make test` locally and all tests pass.
 - [ ] **Formatting**: I have run `make format` and `make lint` to ensure code style compliance.
 - [ ] **Documentation**: Appropriate changes to `README.md` or docstrings have been made.
+- [ ] **GPU Verification**: I have manually verified my change on GPU machines (if applicable).

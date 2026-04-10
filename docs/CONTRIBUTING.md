@@ -84,8 +84,9 @@ isort src tests
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
 3. Make your changes with tests
-4. Run `pytest` and `black --check src tests`
-5. Submit PR with clear description
+4. Run unit tests and smoke tests: `make test-unit` and `make test-smoke`
+5. **GPU Verification**: If your changes affect model loading, quantization, or extraction logic, you **must** verify them manually on a machine with a GPU (e.g., an L4 VM) before submitting.
+6. Submit PR with a clear description and check the verification boxes in the template.
 
 ## Reporting Issues
 
