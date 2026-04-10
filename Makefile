@@ -26,6 +26,12 @@ install-dev:
 test:
 	pytest tests/ -v --tb=short
 
+test-unit:
+	pytest tests/ -v --tb=short -m "not smoke"
+
+test-smoke:
+	pytest tests/test_smoke.py -v --tb=short
+
 # Run tests with coverage
 test-cov:
 	pytest tests/ -v --cov=ams --cov-report=html --cov-report=term

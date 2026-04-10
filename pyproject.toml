@@ -103,3 +103,6 @@ ignore_missing_imports = true
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --tb=short"
+markers = [
+    "smoke: mark test as smoke test"
+]
