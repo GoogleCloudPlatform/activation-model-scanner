@@ -29,11 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from .concepts import (
-    UNIVERSAL_SAFETY_CHECKS,
-    SafetyConcept,
-    get_scan_concepts,
-)
+from .concepts import UNIVERSAL_SAFETY_CHECKS, SafetyConcept, get_scan_concepts
 from .extractor import ActivationExtractor, DirectionResult, ModelLoader
 
 logger = logging.getLogger(__name__)
