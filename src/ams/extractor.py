@@ -406,37 +406,49 @@ class ModelLoader:
 
         logger.info(f"Loading model from {model_path}")
 
-        # Load tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_path,
-            trust_remote_code=trust_remote_code,
-        )
+        try:
+            # Load tokenizer
+            tokenizer = AutoTokenizer.from_pretrained(
+                model_path,
+                trust_remote_code=trust_remote_code,
+            )
 
-        # Ensure padding token exists
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
+            # Ensure padding token exists
+            if tokenizer.pad_token is None:
+                tokenizer.pad_token = tokenizer.eos_token
 
-        # Prepare model loading kwargs
-        model_kwargs = {
-            "trust_remote_code": trust_remote_code,
-            "device_map": device if device != "cpu" else None,
-        }
+            # Prepare model loading kwargs
+            model_kwargs = {
+                "trust_remote_code": trust_remote_code,
+                "device_map": device if device != "cpu" else None,
+            }
 
-        if load_in_8bit:
-            model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
-        elif load_in_4bit:
-            model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True)
-        else:
-            model_kwargs["torch_dtype"] = dtype
+            if load_in_8bit:
+                model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
+            elif load_in_4bit:
+                model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True)
+            else:
+                model_kwargs["torch_dtype"] = dtype
 
-        # Load model
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            **model_kwargs,
-        )
+            # Load model
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path,
+                **model_kwargs,
+            )
 
-        if device == "cpu" or (not load_in_8bit and not load_in_4bit):
-            model = model.to(device)
+            if device == "cpu" or (not load_in_8bit and not load_in_4bit):
+                model = model.to(device)
+        except (ImportError, ModuleNotFoundError) as e:
+            logger.error(f"Failed to load model due to missing dependency: {e}")
+            print(
+                f"\n[AMS Error] Failed to load model due to a missing dependency or import error."
+            )
+            print(
+                f"If you are loading a specific model, you might need to install additional packages."
+            )
+            print(f"Commonly required packages: pip install sentencepiece tiktoken protobuf einops")
+            print(f"Original error: {e}\n")
+            raise
 
         model.eval()
 
