@@ -440,8 +440,12 @@ class ModelLoader:
                 model = model.to(device)
         except (ImportError, ModuleNotFoundError) as e:
             logger.error(f"Failed to load model due to missing dependency: {e}")
-            print(f"\n[AMS Error] Failed to load model due to a missing dependency or import error.")
-            print(f"If you are loading a specific model, you might need to install additional packages.")
+            print(
+                f"\n[AMS Error] Failed to load model due to a missing dependency or import error."
+            )
+            print(
+                f"If you are loading a specific model, you might need to install additional packages."
+            )
             print(f"Commonly required packages: pip install sentencepiece tiktoken protobuf einops")
             print(f"Original error: {e}\n")
             raise
