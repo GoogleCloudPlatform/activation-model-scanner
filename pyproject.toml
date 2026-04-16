@@ -73,11 +73,11 @@ ams = "ams.cli:main"
 ams-scanner = "ams.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/googlecloudplatform/ams-scanner"
-Documentation = "https://github.com/googlecloudplatform/ams-scanner#readme"
-Repository = "https://github.com/googlecloudplatform/ams-scanner"
-Issues = "https://github.com/googlecloudplatform/ams-scanner/issues"
-Changelog = "https://github.com/googlecloudplatform/ams-scanner/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/GoogleCloudPlatform/activation-model-scanner"
+Documentation = "https://github.com/GoogleCloudPlatform/activation-model-scanner#readme"
+Repository = "https://github.com/GoogleCloudPlatform/activation-model-scanner"
+Issues = "https://github.com/GoogleCloudPlatform/activation-model-scanner/issues"
+Changelog = "https://github.com/GoogleCloudPlatform/activation-model-scanner/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
