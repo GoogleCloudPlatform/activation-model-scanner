@@ -429,7 +429,12 @@ Examples:
     # Global options
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("-q", "--quiet", action="store_true", help="Minimal output")
-    parser.add_argument("--device", default="cuda", help="Device (cuda/cpu)")
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cpu", "cuda"],
+        default="auto",
+        help="Device to run on (default: auto-detect)",
+    )
     parser.add_argument("--dtype", default="float16", help="Data type (float16/float32/bfloat16)")
     parser.add_argument("--baselines-dir", default="./baselines", help="Baselines directory")
 
