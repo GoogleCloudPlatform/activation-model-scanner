@@ -15,11 +15,11 @@ AMS requires a GPU for standard operation. Scan times of 10–40 seconds quoted 
 
 | Platform | Recommended command |
 |----------|-------------------|
-| Linux / Windows with NVIDIA GPU | `ams scan <model>` |
-| Mac (Apple Silicon) | `ams scan <model> --device mps` |
-| CPU only | `ams scan <model> --device cpu` |
+| Auto-detect (Default) | `ams scan <model>` |
+| Force CPU mode | `ams scan <model> --device cpu` |
+| Force CUDA mode | `ams scan <model> --device cuda` |
 
-> **Note:** CPU and Apple Silicon (MPS) are supported but will be significantly slower than CUDA.
+> **Note:** By default, AMS will auto-detect if an NVIDIA GPU is available. If not (or if drivers are missing), it will automatically fall back to CPU mode (which will be significantly slower).
 
 ## Quick Start
 

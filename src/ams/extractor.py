@@ -417,10 +417,25 @@ class ModelLoader:
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
+            # Handle device fallback
+            if device == "auto":
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                logger.info(f"Auto-detected device: {device}")
+            elif device == "cuda" and not torch.cuda.is_available():
+                logger.warning("CUDA requested but not available. Falling back to CPU.")
+                device = "cpu"
+
+            if device == "cpu":
+                if dtype == torch.float16:
+                    logger.info("Switching dtype to float32 for CPU compatibility.")
+                    dtype = torch.float32
+                if load_in_8bit or load_in_4bit:
+                    logger.warning("Quantization on CPU may be extremely slow.")
+
             # Prepare model loading kwargs
             model_kwargs = {
                 "trust_remote_code": trust_remote_code,
-                "device_map": device if device != "cpu" else None,
+                "device_map": device,
             }
 
             if load_in_8bit:
