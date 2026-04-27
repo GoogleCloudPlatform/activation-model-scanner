@@ -269,7 +269,15 @@ class ModelScanner:
         dtype: str = "float16",
     ):
         self.baselines_db = BaselineDatabase(baselines_dir)
-        self.device = device
+
+        # Resolve device auto to avoid downstream issues
+        if device == "auto":
+            self.device = "cuda" if getattr(__import__("torch"), "cuda").is_available() else "cpu"
+        elif device == "cuda" and not getattr(__import__("torch"), "cuda").is_available():
+            self.device = "cpu"
+        else:
+            self.device = device
+
         self.dtype = getattr(__import__("torch"), dtype)
 
         self._model: Optional[Any] = None

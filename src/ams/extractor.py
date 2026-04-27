@@ -74,8 +74,12 @@ class ActivationExtractor:
     ):
         self.model = model
         self.tokenizer = tokenizer
+
+        # Auto-resolve device
         if device == "auto":
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        elif device == "cuda" and not torch.cuda.is_available():
+            self.device = "cpu"
         else:
             self.device = device
         self.dtype = dtype

@@ -10,7 +10,7 @@ def test_smoke_scan():
     model_path = "hf-internal-testing/tiny-random-GPT2"
 
     try:
-        scanner = ModelScanner(device="cpu", dtype="float32")
+        scanner = ModelScanner(device="auto", dtype="float32")
         report = scanner.scan(model_path=model_path, mode="quick")
 
         assert isinstance(report, SafetyReport)
