@@ -338,6 +338,137 @@ class TestIdentityVerification:
         assert drift > 0.2
 
 
+class TestModelScannerIdentity:
+    """Test ModelScanner Tier 2 identity verification with mocks."""
+
+    @patch("ams.scanner.BaselineDatabase")
+    @patch("ams.extractor.ActivationExtractor")
+    def test_verify_identity_no_baseline(self, mock_extractor_class, mock_db_class):
+        """Should return a report with verified=None when no baseline exists."""
+        from ams.scanner import ModelScanner
+
+        mock_db = mock_db_class.return_value
+        mock_db.has_baseline.return_value = False
+
+        scanner = ModelScanner(baselines_dir="/tmp/dummy", device="cpu")
+        report = scanner.verify_identity("dummy-model", "claimed-id")
+
+        assert report.verified is None
+        assert "No baseline available" in report.reason
+
+    @patch("ams.scanner.BaselineDatabase")
+    @patch("ams.scanner.ModelScanner._load_model")
+    def test_verify_identity_pass(self, mock_load_model, mock_db_class):
+        """Should return verified=True when direction matches and drift is low."""
+        from ams.extractor import DirectionResult
+        from ams.scanner import ModelBaseline, ModelScanner
+
+        mock_db = mock_db_class.return_value
+        mock_db.has_baseline.return_value = True
+
+        # Create a dummy baseline
+        dummy_baseline = MagicMock(spec=ModelBaseline)
+        dummy_baseline.directions = {"harmful_content": np.array([1.0, 0.0])}
+        dummy_baseline.optimal_layers = {"harmful_content": 12}
+        dummy_baseline.separations = {"harmful_content": 4.0}
+        mock_db.get_baseline.return_value = dummy_baseline
+
+        scanner = ModelScanner(baselines_dir="/tmp/dummy", device="cpu")
+
+        # Mock extractor
+        mock_extractor = MagicMock()
+        mock_extractor.compute_direction.return_value = DirectionResult(
+            direction=np.array([1.0, 0.0]),  # Matches perfectly (cosine similarity = 1.0)
+            separation=3.9,  # Drift = 0.1 / 4.0 = 2.5% (Passes < 20%)
+            positive_mean=2.0,
+            negative_mean=-1.9,
+            pooled_std=1.0,
+            layer=12,
+            n_pairs=10,
+        )
+        scanner._extractor = mock_extractor
+
+        report = scanner.verify_identity("dummy-model", "claimed-id")
+
+        assert report.verified is True
+        assert report.reason is None
+        assert len(report.checks) == 1
+        assert report.checks[0].passed is True
+
+    @patch("ams.scanner.BaselineDatabase")
+    @patch("ams.scanner.ModelScanner._load_model")
+    def test_verify_identity_fail(self, mock_load_model, mock_db_class):
+        """Should return verified=False when there is a mismatch."""
+        from ams.extractor import DirectionResult
+        from ams.scanner import ModelBaseline, ModelScanner
+
+        mock_db = mock_db_class.return_value
+        mock_db.has_baseline.return_value = True
+
+        dummy_baseline = MagicMock(spec=ModelBaseline)
+        dummy_baseline.directions = {"harmful_content": np.array([1.0, 0.0])}
+        dummy_baseline.optimal_layers = {"harmful_content": 12}
+        dummy_baseline.separations = {"harmful_content": 4.0}
+        mock_db.get_baseline.return_value = dummy_baseline
+
+        scanner = ModelScanner(baselines_dir="/tmp/dummy", device="cpu")
+
+        mock_extractor = MagicMock()
+        mock_extractor.compute_direction.return_value = DirectionResult(
+            direction=np.array([0.0, 1.0]),  # Orthogonal (cosine similarity = 0.0, Fails < 0.8)
+            separation=3.9,
+            positive_mean=2.0,
+            negative_mean=-1.9,
+            pooled_std=1.0,
+            layer=12,
+            n_pairs=10,
+        )
+        scanner._extractor = mock_extractor
+
+        report = scanner.verify_identity("dummy-model", "claimed-id")
+
+        assert report.verified is False
+        assert "Identity verification FAILED" in report.reason
+        assert report.checks[0].passed is False
+
+    @patch("ams.scanner.BaselineDatabase")
+    @patch("ams.scanner.ModelScanner._load_model")
+    @patch("ams.extractor.ModelLoader.get_model_info")
+    def test_create_baseline(self, mock_model_info, mock_load_model, mock_db_class):
+        """Test creating a baseline."""
+        from ams.extractor import DirectionResult, LayerSearchResult
+        from ams.scanner import ModelBaseline, ModelScanner
+
+        mock_db = mock_db_class.return_value
+        mock_model_info.return_value = {"layers": 32, "hidden_size": 4096}
+
+        scanner = ModelScanner(baselines_dir="/tmp/dummy", device="cpu")
+
+        mock_extractor = MagicMock()
+        mock_extractor.extract_direction_with_layer_search.return_value = (
+            DirectionResult(
+                direction=np.array([1.0, 0.0]),
+                separation=4.2,
+                positive_mean=2.0,
+                negative_mean=-1.9,
+                pooled_std=1.0,
+                layer=14,
+                n_pairs=10,
+            ),
+            LayerSearchResult(optimal_layer=14, separations={14: 4.2}, search_time=1.5),
+        )
+        scanner._extractor = mock_extractor
+
+        baseline = scanner.create_baseline("dummy-model", mode="quick")
+
+        assert isinstance(baseline, ModelBaseline)
+        assert baseline.model_id == "dummy-model"
+        assert "harmful_content" in baseline.directions
+        assert baseline.separations["harmful_content"] == 4.2
+        assert baseline.optimal_layers["harmful_content"] == 14
+        assert mock_db.save_baseline.called
+
+
 class TestLayerSelection:
     """Test optimal layer selection logic."""
 
