@@ -274,7 +274,7 @@ class ModelScanner:
         if device == "auto":
             self.device = "cuda" if getattr(__import__("torch"), "cuda").is_available() else "cpu"
         elif device == "cuda" and not getattr(__import__("torch"), "cuda").is_available():
-            self.device = "cpu"
+            raise RuntimeError("CUDA requested but not available on this machine.")
         else:
             self.device = device
 

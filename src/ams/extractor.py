@@ -79,7 +79,7 @@ class ActivationExtractor:
         if device == "auto":
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         elif device == "cuda" and not torch.cuda.is_available():
-            self.device = "cpu"
+            raise RuntimeError("CUDA requested but not available on this machine.")
         else:
             self.device = device
         self.dtype = dtype
@@ -429,8 +429,7 @@ class ModelLoader:
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 logger.info(f"Auto-detected device: {device}")
             elif device == "cuda" and not torch.cuda.is_available():
-                logger.warning("CUDA requested but not available. Falling back to CPU.")
-                device = "cpu"
+                raise RuntimeError("CUDA requested but not available on this machine.")
 
             if device == "cpu":
                 if dtype == torch.float16:
