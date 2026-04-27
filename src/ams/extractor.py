@@ -74,7 +74,10 @@ class ActivationExtractor:
     ):
         self.model = model
         self.tokenizer = tokenizer
-        self.device = device
+        if device == "auto":
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        else:
+            self.device = device
         self.dtype = dtype
 
         # Detect architecture and set up layer access
