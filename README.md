@@ -23,14 +23,21 @@ AMS requires a GPU for standard operation. Scan times of 10–40 seconds quoted 
 
 ## Quick Start
 
+You can install the AMS Scanner directly from PyPI, or clone the repository to install it from source:
+
 ```bash
-# Clone the repository
+# Install from PyPI with CLI tools
+pip install "ams-scanner[cli]"
+
+# Or clone and install from source
 git clone https://github.com/GoogleCloudPlatform/activation-model-scanner.git
 cd activation-model-scanner
-
-# Install locally
 pip install -e ".[cli]"
+```
 
+### Usage Examples
+
+```bash
 # Scan an ungated model (no authentication required)
 ams scan google/gemma-2-2b-it
 
