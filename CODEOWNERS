@@ -1,0 +1,5 @@
+# Lines starting with '#' are comments.
+# Each line consists of a filter pattern followed by one or more owners.
+
+# By default, assign all files to the ams-approver team and Glen Messenger.
+*       @GoogleCloudPlatform/ams-approver @glenmessenger
