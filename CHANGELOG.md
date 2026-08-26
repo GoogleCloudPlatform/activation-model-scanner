@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- Model loading now requires `safetensors` weights by default; legacy pickle
+  (`.bin`) checkpoints require the new `--allow-pickle` flag
+- Raised minimum dependency versions: `torch>=2.6.0`, `transformers>=4.48.0`
+- Pinned GitHub Actions to commit SHAs; CI workflow token restricted to read-only
+
+### Fixed
+- Example GitHub Actions workflow: corrected package name (`ams-scanner`) and
+  JSON output paths; documented exit codes now match CLI behavior
+
 ## [0.1.0] - 2026-02-05
 
 ### Added

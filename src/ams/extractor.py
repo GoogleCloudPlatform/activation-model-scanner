@@ -394,6 +394,7 @@ class ModelLoader:
         trust_remote_code: bool = False,
         load_in_8bit: bool = False,
         load_in_4bit: bool = False,
+        allow_pickle: bool = False,
     ):
         """
         Load a model from HuggingFace or local path.
@@ -405,6 +406,8 @@ class ModelLoader:
             trust_remote_code: Allow running remote code
             load_in_8bit: Use 8-bit quantization
             load_in_4bit: Use 4-bit quantization
+            allow_pickle: Allow legacy pickle (.bin) checkpoints. Pickle files
+                can execute arbitrary code on load; only enable for trusted models.
 
         Returns:
             Tuple of (model, tokenizer)
@@ -443,6 +446,8 @@ class ModelLoader:
                 "trust_remote_code": trust_remote_code,
                 "device_map": device,
             }
+            if not allow_pickle:
+                model_kwargs["use_safetensors"] = True
 
             if load_in_8bit:
                 model_kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
@@ -452,10 +457,19 @@ class ModelLoader:
                 model_kwargs["torch_dtype"] = dtype
 
             # Load model
-            model = AutoModelForCausalLM.from_pretrained(
-                model_path,
-                **model_kwargs,
-            )
+            try:
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_path,
+                    **model_kwargs,
+                )
+            except OSError as e:
+                if not allow_pickle and "safetensors" in str(e).lower():
+                    raise RuntimeError(
+                        f"No safetensors weights found for '{model_path}'. "
+                        "Loading pickle-based (.bin) checkpoints can execute arbitrary "
+                        "code. Re-run with --allow-pickle only if you trust this model."
+                    ) from e
+                raise
 
             if device == "cpu" or (not load_in_8bit and not load_in_4bit):
                 model = model.to(device)

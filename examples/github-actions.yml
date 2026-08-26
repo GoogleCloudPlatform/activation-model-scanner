@@ -1,5 +1,8 @@
 # Example GitHub Actions workflow for AMS model scanning
 # Place in .github/workflows/model-safety.yml
+#
+# Exit codes from `ams scan`: 0 = PASS, 1 = CRITICAL, 2 = WARNING,
+# 3 = identity verification failed.
 
 name: Model Safety Check
 
@@ -16,6 +19,9 @@ on:
         description: 'Path to model to scan'
         required: true
         default: 'models/my-model'
+
+env:
+  MODEL_PATH: ${{ github.event.inputs.model_path || 'models/my-model' }}
 
 jobs:
   safety-scan:
@@ -34,16 +40,18 @@ jobs:
 
       - name: Install AMS
         run: |
-          pip install ams[cli]
+          pip install "ams-scanner[cli]"
 
       - name: Run safety scan
         id: scan
         run: |
-          MODEL_PATH="${{ github.event.inputs.model_path || 'models/my-model' }}"
+          # Capture the exit code so results can be reported before gating
+          set +e
           ams scan "$MODEL_PATH" --json > scan-results.json
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          set -e
 
-          # Extract overall level for summary
-          LEVEL=$(jq -r '.overall_level' scan-results.json)
+          LEVEL=$(jq -r '.safety_report.overall_level' scan-results.json)
           echo "safety_level=$LEVEL" >> $GITHUB_OUTPUT
 
       - name: Upload scan results
@@ -60,13 +68,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Concept Results" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          jq '.concepts' scan-results.json >> $GITHUB_STEP_SUMMARY
+          jq '.safety_report.concept_results | map_values(del(.direction))' scan-results.json >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Fail on unsafe model
         if: steps.scan.outputs.safety_level == 'CRITICAL'
         run: |
-          echo "❌ Model failed safety check with CRITICAL level"
+          echo "Model failed safety check with CRITICAL level"
           exit 1
 
   # Optional: Identity verification against known baseline
@@ -87,22 +95,22 @@ jobs:
           python-version: '3.11'
 
       - name: Install AMS
-        run: pip install ams[cli]
+        run: pip install "ams-scanner[cli]"
 
       - name: Verify model identity
+        env:
+          BASELINE: meta-llama/Llama-3.1-8B-Instruct
         run: |
-          MODEL_PATH="${{ github.event.inputs.model_path || 'models/my-model' }}"
-          BASELINE="meta-llama/Llama-3.1-8B-Instruct"
-
+          set +e
           ams scan "$MODEL_PATH" \
             --verify "$BASELINE" \
             --json > verify-results.json
+          set -e
 
-          # Check similarity threshold
-          SIMILARITY=$(jq -r '.identity_verification.similarity' verify-results.json)
-          echo "Direction similarity: $SIMILARITY"
+          VERIFIED=$(jq -r '.verification_report.verified' verify-results.json)
+          echo "Verified: $VERIFIED"
 
-          if (( $(echo "$SIMILARITY < 0.7" | bc -l) )); then
-            echo "❌ Model does not match claimed baseline"
+          if [ "$VERIFIED" != "true" ]; then
+            echo "Model does not match claimed baseline"
             exit 1
           fi

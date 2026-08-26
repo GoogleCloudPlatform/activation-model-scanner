@@ -272,6 +272,7 @@ def cmd_scan(args):
                     trust_remote_code=args.trust_remote_code,
                     load_in_8bit=args.load_8bit,
                     load_in_4bit=args.load_4bit,
+                    allow_pickle=args.allow_pickle,
                 )
         else:
             if not args.quiet:
@@ -286,6 +287,7 @@ def cmd_scan(args):
                 trust_remote_code=args.trust_remote_code,
                 load_in_8bit=args.load_8bit,
                 load_in_4bit=args.load_4bit,
+                allow_pickle=args.allow_pickle,
             )
     except ValueError as e:
         if RICH_AVAILABLE and not args.quiet:
@@ -335,6 +337,7 @@ def cmd_baseline(args):
             trust_remote_code=args.trust_remote_code,
             load_in_8bit=args.load_8bit,
             load_in_4bit=args.load_4bit,
+            allow_pickle=args.allow_pickle,
         )
         print(f"Baseline created and saved for: {baseline.model_id}")
         print(f"Concepts: {list(baseline.directions.keys())}")
@@ -466,6 +469,12 @@ Examples:
         "--load-4bit", action="store_true", help="Load model in 4-bit quantization"
     )
     scan_parser.add_argument(
+        "--allow-pickle",
+        action="store_true",
+        help="Allow legacy pickle (.bin) checkpoints (can execute arbitrary code; "
+        "only use with trusted models)",
+    )
+    scan_parser.add_argument(
         "--concepts-file", metavar="FILE", help="Custom JSON file with safety concepts"
     )
     scan_parser.set_defaults(func=cmd_scan)
@@ -487,6 +496,7 @@ Examples:
     baseline_parser.add_argument("--trust-remote-code", action="store_true")
     baseline_parser.add_argument("--load-8bit", action="store_true")
     baseline_parser.add_argument("--load-4bit", action="store_true")
+    baseline_parser.add_argument("--allow-pickle", action="store_true")
     baseline_parser.set_defaults(func=cmd_baseline)
 
     # Concepts command

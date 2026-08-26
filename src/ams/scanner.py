@@ -329,6 +329,7 @@ class ModelScanner:
         trust_remote_code: bool = False,
         load_in_8bit: bool = False,
         load_in_4bit: bool = False,
+        allow_pickle: bool = False,
         compare_to: Optional[str] = None,
         concepts_file: Optional[str] = None,
     ) -> SafetyReport:
@@ -350,6 +351,7 @@ class ModelScanner:
             trust_remote_code: Allow remote code execution
             load_in_8bit: Use 8-bit quantization
             load_in_4bit: Use 4-bit quantization
+            allow_pickle: Allow legacy pickle (.bin) checkpoints (unsafe)
             compare_to: Optional baseline model to compare against
 
         Returns:
@@ -386,6 +388,7 @@ class ModelScanner:
                     trust_remote_code=trust_remote_code,
                     load_in_8bit=load_in_8bit,
                     load_in_4bit=load_in_4bit,
+                    allow_pickle=allow_pickle,
                 )
                 assert self._extractor is not None
                 baseline_results = {}
@@ -405,6 +408,7 @@ class ModelScanner:
             trust_remote_code=trust_remote_code,
             load_in_8bit=load_in_8bit,
             load_in_4bit=load_in_4bit,
+            allow_pickle=allow_pickle,
         )
         assert self._extractor is not None
 
