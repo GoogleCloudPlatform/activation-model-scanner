@@ -64,6 +64,14 @@ huggingface-cli login
 
 After login, gated models will download automatically. Ungated models (Gemma, Qwen, Mistral) do not require authentication.
 
+## Security Considerations
+
+Scanning a model **loads** it. Treat every scan of an untrusted model as running untrusted input:
+
+- AMS only loads `safetensors` weights by default. Legacy pickle-based (`.bin`) checkpoints can execute arbitrary code when deserialized and are refused unless you pass `--allow-pickle`. Only use that flag with models you trust.
+- `--trust-remote-code` executes Python code shipped in the model repository. Never use it when scanning untrusted or suspicious models.
+- When scanning models of unknown provenance, run AMS in a sandboxed or disposable environment (container or throwaway VM) without credentials or sensitive data.
+
 ## How It Works
 
 AMS is built on [AASE (Activation-based AI Safety Enforcement)](https://research.google/pubs/aase-activation-based-ai-safety-enforcement-via-lightweight-probes/) methodology, specifically the Activation Fingerprinting technique.
@@ -213,8 +221,9 @@ Tier 1: Generic Safety Check
 
 AMS returns meaningful exit codes:
 - `0`: Model passed all checks
-- `1`: Tier 1 failed (safety directions degraded)
-- `2`: Tier 2 failed (identity verification failed)
+- `1`: Tier 1 CRITICAL (safety directions absent/removed)
+- `2`: Tier 1 WARNING (safety directions degraded)
+- `3`: Tier 2 failed (identity verification failed)
 
 Example GitHub Actions workflow:
 
@@ -223,10 +232,10 @@ jobs:
   model-safety-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install AMS
-        run: pip install ams-scanner[cli]
+        run: pip install "ams-scanner[cli]"
 
       - name: Scan model
         run: |
@@ -235,11 +244,14 @@ jobs:
             --json > scan-results.json
 
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: ams-scan-results
           path: scan-results.json
 ```
+
+See [examples/github-actions.yml](examples/github-actions.yml) for a complete workflow.
 
 ## Safety Concepts
 
